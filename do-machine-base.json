@@ -9,6 +9,11 @@
 
   "provisioners": [
     {
+      "type": "file",
+      "source": "/Users/guillaumegarcera/.ssh/id_rsa.pub",
+      "destination": "/tmp/id_rsa.pub"
+    },
+    {
       "type": "shell",
       "inline": [
         "sleep 30",

@@ -1,7 +1,17 @@
 ---
 - hosts: all
   tasks:
-    - include: tasks/percona.yml
+    - user: name=djtal shell=/bin/bash group=adm append=yes generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=.ssh/id_rsa
+    - authorized_key: user=djtal key="{{ lookup('file', '/tmp/id_rsa.pub') }}"
+
+    - name: Disallow password authentication
+      action: lineinfile dest=/etc/ssh/sshd_config regexp="^PasswordAuthentication" line="PasswordAuthentication no" state=present
+      notify: restart ssh
+
+    - name: Disallow root SSH access
+      action: lineinfile dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin no" state=present
+      notify: restart ssh
+
     - name: Installs nginx web server
       apt: pkg=nginx state=installed update_cache=true
       notify:
@@ -10,3 +20,7 @@
   handlers:
     - name: start nginx
       service: name=nginx state=started
+
+    - name: restart ssh
+      service: name=ssh state=restarted
+
